@@ -7,8 +7,28 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @ApiResource()
+ * 
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @ApiResource(
+ * 
+ * collectionOperations={
+ * 
+ * 
+ * "creationadmin"={
+ *     "method"="POST",
+ *     "path"="users/ADMIN/CREATION",
+ *     "access_control"="has_role('ROLE_SUPADMIN')"
+ *      },
+ * 
+ * "recuperationadmin"={
+ *      "method"="GET",
+ *      "path"="users/ADMIN/SHOW",
+ *      "access_control"="has_role('ROLE_SUPADMIN')"
+ * },
+ * 
+ * 
+ *}
+ *  )  
  */
 class User implements UserInterface
 {
