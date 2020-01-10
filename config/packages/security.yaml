@@ -4,8 +4,7 @@ security:
             algorithm: bcrypt
 
     role_hierarchy:    
-        ROLE_ADMIN: ROLE_CAISSIER
-        ROLE_SUPADMIN: [ROLE_ADMIN, ROLE_CAISSIER]
+        ROLE_ADMIN: ROLE_USER
             
     providers:
         entity_provider:
@@ -36,7 +35,6 @@ security:
             stateless: true
             anonymous: false
             provider: entity_provider
-            user_checker: App\Security\UserChecker
             guard:
                 authenticators:
                     - lexik_jwt_authentication.jwt_token_authenticator

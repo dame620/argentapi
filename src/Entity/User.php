@@ -5,10 +5,9 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 
 /**
- * 
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ApiResource(
  * 
  * collectionOperations={
@@ -16,21 +15,51 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * 
  * "creationadmin"={
  *     "method"="POST",
- *     "path"="users/ADMIN/CREATION",
+ *     "path"="ADMIN/CREATION",
  *     "access_control"="has_role('ROLE_SUPADMIN')"
  *      },
  * 
  * "recuperationadmin"={
  *      "method"="GET",
- *      "path"="users/ADMIN/SHOW",
+ *      "path"="ADMIN/SHOW",
  *      "access_control"="has_role('ROLE_SUPADMIN')"
  * },
  * 
+ *},
  * 
- *}
- *  )  
+ * itemOperations={
+ *    
+ *     "recuperationadmin"={
+ *         "method"="GET",
+ *         "path"="ADMIN/SHOW/{id}",
+ *         "access_control"="has_role('ROLE_SUPADMIN')"
+ *     },
+ * 
+ * "modificationnadmin"={
+ *         "method"="PUT",
+ *         "path"="ADMIN/MODIFIER/{id}",
+ *         "access_control"="has_role('ROLE_SUPADMIN')"
+ *     },
+ * 
+ * "modificationcaissier"={
+ *         "method"="PUT",
+ *         "path"="CAISSIER/MODIFIER/{id}",
+ *         "access_control"="is_granted('ROLE_SUPADMIN', 'ROLE_ADMIN')",
+ *         "access_control_message"="seul les supadmin et les admin sont autorisés a modifier un caissier"
+ *     },
+ * 
+ *     "recuperatincaissier"={
+ *         "method"="GET",
+ *         "path"="ADMIN/SHOW/{id}",
+ *          "access_control"="is_granted('ROLE_SUPADMIN', 'ROLE_ADMIN')", 
+ *   "access_control_message"="seul les supadmin et les admin sont autorisés a modifier un caissier"
+ *  },
+ * 
+ * }
+ * )
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class User implements UserInterface
+class User implements AdvancedUserInterface
 {
     /**
      * @ORM\Id()
@@ -99,7 +128,7 @@ class User implements UserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        
 
         return array_unique($roles);
     }
@@ -178,4 +207,26 @@ class User implements UserInterface
 
         return $this;
     }
+
+    public function isAccountNonExpired()
+    {
+        return true;
+    }
+
+    public function isAccountNonLocked()
+    {
+    
+        return true;
+    }
+
+    public function isCredentialsNonExpired()
+    {
+        return true;
+    }
+
+    public function isEnabled()
+    {
+        return $this->isActive;
+    }
+    
 }
