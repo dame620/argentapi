@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\AdvancedUserInterface;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+
 
 /**
+ * @ApiFilter(BooleanFilter::class, properties={"isActive"})
  * @ApiResource(
  * 
  * collectionOperations={
@@ -16,13 +19,13 @@ use Symfony\Component\Security\Core\User\AdvancedUserInterface;
  * "creationadmin"={
  *     "method"="POST",
  *     "path"="ADMIN/CREATION",
- *     "access_control"="has_role('ROLE_SUPADMIN')"
+ *     "security"="is_granted('ROLE_ADMIN', 'ADD')"
  *      },
  * 
  * "recuperationadmin"={
  *      "method"="GET",
  *      "path"="ADMIN/SHOW",
- *      "access_control"="has_role('ROLE_SUPADMIN')"
+ *      "security"="is_granted('ROLE_ADMIN', 'VIEW')"
  * },
  * 
  *},
@@ -32,34 +35,19 @@ use Symfony\Component\Security\Core\User\AdvancedUserInterface;
  *     "recuperationadmin"={
  *         "method"="GET",
  *         "path"="ADMIN/SHOW/{id}",
- *         "access_control"="has_role('ROLE_SUPADMIN')"
+ *         "security"="is_granted('ROLE_ADMIN', 'VIEW')"
  *     },
  * 
  * "modificationnadmin"={
  *         "method"="PUT",
  *         "path"="ADMIN/MODIFIER/{id}",
- *         "access_control"="has_role('ROLE_SUPADMIN')"
+ *         "security"="is_granted('ROLE_ADMIN', 'EDIT', object)"
  *     },
- * 
- * "modificationcaissier"={
- *         "method"="PUT",
- *         "path"="CAISSIER/MODIFIER/{id}",
- *         "access_control"="is_granted('ROLE_SUPADMIN', 'ROLE_ADMIN')",
- *         "access_control_message"="seul les supadmin et les admin sont autorisés a modifier un caissier"
- *     },
- * 
- *     "recuperatincaissier"={
- *         "method"="GET",
- *         "path"="ADMIN/SHOW/{id}",
- *          "access_control"="is_granted('ROLE_SUPADMIN', 'ROLE_ADMIN')", 
- *   "access_control_message"="seul les supadmin et les admin sont autorisés a modifier un caissier"
- *  },
- * 
  * }
  * )
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class User implements AdvancedUserInterface
+class User implements UserInterface
 {
     /**
      * @ORM\Id()
@@ -208,25 +196,6 @@ class User implements AdvancedUserInterface
         return $this;
     }
 
-    public function isAccountNonExpired()
-    {
-        return true;
-    }
 
-    public function isAccountNonLocked()
-    {
-    
-        return true;
-    }
 
-    public function isCredentialsNonExpired()
-    {
-        return true;
-    }
-
-    public function isEnabled()
-    {
-        return $this->isActive;
-    }
-    
 }

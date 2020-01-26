@@ -4,7 +4,9 @@ security:
             algorithm: bcrypt
 
     role_hierarchy:    
-        ROLE_ADMIN: ROLE_USER
+        ROLE_SUPADMIN: ROLE_ADMIN, ROLE_CAISSIER
+        ROLE_ADMIN: ROLE_CAISSIER
+
             
     providers:
         entity_provider:
@@ -31,7 +33,7 @@ security:
             anonymous: true
 
         api:
-            pattern:  ^/api
+            pattern: ^/api
             stateless: true
             anonymous: false
             provider: entity_provider
