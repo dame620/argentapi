@@ -16,10 +16,10 @@ class UserDataPersister implements DataPersisterInterface
     {
         
         $this->entityManager = $entityManager;
-
-        $this->userPasswordEncoder = $userPasswordEncoder;
       
     }
+
+    
 
 
 
@@ -36,16 +36,9 @@ class UserDataPersister implements DataPersisterInterface
 
       {
 
-        if ($data->getPassword()) {
-            $data->setPassword(
-                $this->userPasswordEncoder->encodePassword($data, $data->getPassword())
-            );
-            $data->eraseCredentials();
-        }
-        
-
         $this->entityManager->persist($data);
         $this->entityManager->flush();
+
        }
 
     public function remove($data)

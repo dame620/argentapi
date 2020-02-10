@@ -2,137 +2,136 @@
 
 namespace App\Security\Voter;
 
+use Exception;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class UserVoter extends Voter
 {
-
+    /*
+    const ROLE_SUPADMIN = 'ROLE_SUPADMIN';
+    const ROLE_ADMIN = 'ROLE_ADMIN';
+    const ROLE_CAISSIER = 'ROLE_CAISSIER';
+    */
     private $security;
     private $tokenStorage;
+    private $decisionManager;
+    
 
-    const VIEW = 'view';
-    const EDIT = 'edit';
-    const ADD = 'add';
-
-    public function __construct(Security $security, TokenStorageInterface $tokenStorage)
+    public function __construct(Security $security, TokenStorageInterface $tokenStorage, AccessDecisionManagerInterface $decisionManager )
     {
         $this->security = $security;
         $this->tokenStorage = $tokenStorage;
+        $this->decisionManager = $decisionManager;
     }
 
     
     protected function supports($attribute, $subject)
     {
-        // replace with your own logic
-        // https://symfony.com/doc/current/security/voters.html
-       /* if(!in_array($attribute, [self::VIEW, self::EDIT, self::ADD])){
-       return false;
-}*/
+   
 
-return in_array($attribute, ['EDIT', 'VIEW', 'ADD'])
+return in_array($attribute, ['EDIT', 'VIEW', 'POST'])
          && $subject instanceof \App\Entity\User;
 
-   /* if(!$subject instanceof User ){
-        return false;
+   
     }
 
-    return true;
-    */
-
-    }
 
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
 
-
-         // ROLE_SUPER_ADMIN can do anything! The power!
-         if ($this->security->isGranted('ROLE_SUPADMIN')) {
-            return true;
+        
+     //dd($subject);
+         $user = $token->getUser();
+        
+        // if the user is anonymous, do not grant access
+        
+        if (!$user instanceof UserInterface) {
+            return false;
         }
+        
+       // $rol = $subject->getRole()->getLibelle();
+      //  $subject->setRoles(array("ROLE_".$rol));
 
-        if ($this->tokenStorage->getToken()->getRoles()[0]==self::ROLE_ADMIN){
-           if($subject->getRoles()[0]==self::ROLE_ADMIN || $subject->getRoles()[0]==self::ROLE_SUPADMIN){
-               return false;
-           }
+        //dd($user->getRole()->getLibelle());
+       if($user->getRole()->getLibelle() == "SUPADMIN"){
+        return true;
+       }
+      
+       if($user->getRole()->getLibelle() == "CAISSIER"){
+        throw new Exception("attention vous ne pouvez pas effectuer cette action en tant que caissier");
+    }
+   // dd($user->getRole()->getLibelle());
+    //dd($user->getRole()->getLibelle());
+   // $makhou = ($user->getRoles()[0]);
+  // dd($user->getRoles()[0]);
+  if(($user->getRole()->getLibelle()=== "ADMIN") &&(
+    $subject->getRole()->getLibelle() == "SUPADMIN" || $subject->getRole()->getLibelle() == "ADMIN" 
+ )){
+    throw new Exception("attention vous ne pouvez pas effectuer cette action en tant que admin");
+ }
 
-        }
+ if(($user->getRole()->getLibelle()=== "PARTENAIRE") &&(
+    $subject->getRole()->getLibelle() == "SUPADMIN" || $subject->getRole()->getLibelle() == "ADMIN" 
+    || $subject->getRole()->getLibelle() == "CAISSIER" 
+ )){
+    throw new Exception("attention vous ne pouvez pas effectuer cette action en tant que partenaire");
+ }
 
-        if ($this->tokenStorage->getToken()->getRoles()[0]==self::ROLE_CAISSIER){
-            if($subject->getRoles()[0]==self::ROLE_CAISSIER || $subject->getRoles()[0]==self::ROLE_ADMIN || $subject->getRoles()[0]==self::ROLE_SUPADMIN){
-                return false;
-            }
+       switch ($attribute) {
+        case 'POST':
+            
+        break;
+
+            case 'VIEW':
+          
+            break;
+                
+            case 'EDIT':
+
+             
+            break;
+                 }
  
+               return true;
+  }
+}
+//comment
+/*        
+        if (( $userconnecte->getRoles()[0]==self::ROLE_ADMIN ) && ($subject->getRoles()[0]==self::ROLE_ADMIN || $subject->getRoles()[0]==self::ROLE_SUPADMIN)){
+               throw new Exception ("impossible d\'\effectuer cette operation");
+           
+
+        }
+//throw new \Exception('impossible d\'effectuer cette action');
+        elseif(($userconnecte->getRoles()[0]==self::ROLE_CAISSIER) && ($subject->getRoles()[0]==self::ROLE_CAISSIER || $subject->getRoles()[0]==self::ROLE_ADMIN || $subject->getRoles()[0]==self::ROLE_SUPADMIN)){
+           
+         throw new Exception ("impossible d\'\effectuer cette operation");
+            
          }
 
 
-        $user = $token->getUser();
-        // if the user is anonymous, do not grant access
-        if (!$user instanceof User) {
-            return false;
-        }
+              // replace with your own logic
+        // https://symfony.com/doc/current/security/voters.html
+       /* if(!in_array($attribute, [self::VIEW, self::EDIT, self::ADD])){
+       return false;
+}
 
-//check if the user is a actuel owner of the post
-//verifier si le user qui est entrain d'effectuer sur un usrtr l'a crée
-  /*      if (!$subject->getUser() === $user) {
-            return false;
-        }
-      */ 
-         // you know $subject is a Post object, thanks to supports
-        /** @var User $post */
-
-        $post = $subject;
-
-       switch ($attribute) {
-
-            case self::VIEW:
-               return $this->canView($post, $user);
-
-               if ($this->security->isGranted('ROLE_SUPADMIN')) {
-                return true;
-            }
-            break;
-                case self::ADD:
-                return $this->canADD($post, $user);
-
-                if ($this->security->isGranted('ROLE_SUPADMIN')) {
-                    return true;
-                }
-            break;
-
-            case self::EDIT:
-
-                return $this->canEdit($post, $user);
-                if ($this->security->isGranted('ROLE_SUPADMIN')) {
-                    return true;
-                }
-            break;
-        }
- throw new \LogicException('This code should not be reached!');
-    }
-/*
-    private function canView(User $post, User $user)
-    {
-        // if they can edit, they can view
-        if ($this->canEdit($post, $user)) {
+if ($this->decisionManager->decide($token, array(self::ROLE_SUPADMIN))){
             return true;
         }
 
-        // the Post object could have, for example, a method isPrivate()
-        // that checks a boolean $private property
-        return !$post->isPrivate();
-    }
+                
 
-    private function canEdit(User $post, User $user)
-    {
-        // this assumes that the data object has a getOwner() method
-        // to get the entity of the user who owns this data object
-        return $user === $post->getOwner();
-    }
+         // ROLE_SUPER_ADMIN can do anything! The power!
+         
+        //user qui s'est connecté
+        $userconnecte = $this->tokenStorage->getToken()->getUser();
+
 
 */
-}

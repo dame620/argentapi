@@ -4,6 +4,8 @@ namespace App\DataFixtures;
 
 use App\Entity\Role;
 use App\Entity\User;
+use App\Entity\Compte;
+use App\Entity\Partenaire;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -59,7 +61,33 @@ class AppFixtures extends Fixture
         $user3->setRole($role3);
         $user3->setNomcomplet("fatouba");
         $manager->persist($user3);
- 
+
+        $partenaire1 = new Partenaire;
+        $partenaire1->setNinea(1234);
+        $partenaire1->setRc("abc");
+        $manager->persist($partenaire1);
+
+        $role4 = new Role;
+        $role4->setLibelle("PARTENAIRE");
+        $manager->persist($role4);
+
+        $user4 = new User();
+        $user4->setPassword($this->encoder->encodePassword($user4, "modou123"));
+        $user4->setRoles(array("ROLE_".$role4->getLibelle()));
+        $user4->setIsActive(true);
+        $user4->setUsername("modou");
+        $user4->setRole($role4);
+        $user4->setPartenaire($partenaire1);
+        $user4->setNomcomplet("modoudiop");
+        $manager->persist($user4);
+
+        $compte1 = new Compte;
+        //$compte1->setNumerocompte("ab123451c");
+       // $compte1->setCreateat( new \Datetime());
+        $compte1->setUser( $user4);
+        
+        $manager->persist($compte1);
+
         $manager->flush();
     
     }
