@@ -47,6 +47,7 @@ return in_array($attribute, ['EDIT', 'VIEW', 'POST'])
 
         
      //dd($subject);
+     //user connecté
          $user = $token->getUser();
         
         // if the user is anonymous, do not grant access
@@ -63,7 +64,7 @@ return in_array($attribute, ['EDIT', 'VIEW', 'POST'])
         return true;
        }
       
-       if($user->getRole()->getLibelle() == "CAISSIER"){
+       if($user->getRole()->getLibelle() == "CAISSIER" || $user->getRole()->getLibelle() == "USERPARTENAIRE"){
         throw new Exception("attention vous ne pouvez pas effectuer cette action en tant que caissier");
     }
    // dd($user->getRole()->getLibelle());
@@ -79,6 +80,15 @@ return in_array($attribute, ['EDIT', 'VIEW', 'POST'])
  if(($user->getRole()->getLibelle()=== "PARTENAIRE") &&(
     $subject->getRole()->getLibelle() == "SUPADMIN" || $subject->getRole()->getLibelle() == "ADMIN" 
     || $subject->getRole()->getLibelle() == "CAISSIER" 
+ )){
+    throw new Exception("attention vous ne pouvez pas effectuer cette action en tant que partenaire");
+ }
+
+
+ if(($user->getRole()->getLibelle()=== "ADMINPARTENAIRE") &&(
+    $subject->getRole()->getLibelle() == "SUPADMIN" || $subject->getRole()->getLibelle() == "ADMIN" 
+    || $subject->getRole()->getLibelle() == "CAISSIER" || $subject->getRole()->getLibelle()=== "PARTENAIRE"
+    || $subject->getRole()->getLibelle()=== "ADMINPARTENAIRE"
  )){
     throw new Exception("attention vous ne pouvez pas effectuer cette action en tant que partenaire");
  }

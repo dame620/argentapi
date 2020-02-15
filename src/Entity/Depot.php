@@ -11,13 +11,33 @@ use Symfony\Component\Serializer\Annotation\Groups;
 /**
  * @ApiResource(
  * 
- *  * collectionOperations={
+ * collectionOperations={
  * "POST"={
+ *    "access_control"="is_granted('POST', object)",
  *     "controller"=DepotController::class,
- *      }
- 
+ * 
+ *      },
+ * 
+ * "GETALLUSER"={
+ * "method"="GET",
+ *
+ *   }
+ * },
+ * 
+ * itemOperations={
+ *    
+ * "recuperationadmin"={
+ *      "method"="GET",
+ *      
+ * },
+ * 
+ * "PUT"={
+ *      "access_control"="is_granted('EDIT', object)",
+ *      "controller"=DepotController::class,
+ * },
  * }
-
+ * 
+ *
  * )
  * @ORM\Entity(repositoryClass="App\Repository\DepotRepository")
  */

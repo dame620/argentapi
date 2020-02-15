@@ -1,22 +1,23 @@
 <?php
 namespace App\DataPersister;
-
-use App\Entity\User;
-use App\DataPersister\UserDataPersister;
+use App\Entity\Compte;
+use App\Repository\ContratRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use ApiPlatform\Core\DataPersister\DataPersisterInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+
 
 class UserDataPersister implements DataPersisterInterface
 {
 
     private $entityManager;
-  
-    public function __construct(EntityManagerInterface $entityManager, UserPasswordEncoderInterface $userPasswordEncoder)
+    private $repocont;
+    public function __construct(EntityManagerInterface $entityManager,ContratRepository $repocont, UserPasswordEncoderInterface $userPasswordEncoder)
     {
         
         $this->entityManager = $entityManager;
-      
+        $this->repocont =  $repocont;
     }
 
     
@@ -26,19 +27,35 @@ class UserDataPersister implements DataPersisterInterface
     public function supports($data): bool
     {
         
-        return $data instanceof User;
+        return $data instanceof Compte;
+       
     }
     
     /**
-     * @param User $data
+     * @param Compte $data
      */
     public function persist($data)
 
       {
+     
+       //$term = $this->repocont->findBy(['id'=>1]);
+    
+       $term=$this->repocont->findAll();
+    
+        $texterme=$term[0]->getTerme();
+       // dd($texterme);
+        $nompersonne = $data->getPartenaire()->getusers()[0]->getNomcomplet();
+        $nineaperson = $data->getPartenaire()->getNinea();
+        $search=["#nomcomplet","#ninea"];
+        $replace=[$nompersonne,$nineaperson];
+
+        $newtexterme=str_replace ($search ,$replace , $texterme );
 
         $this->entityManager->persist($data);
         $this->entityManager->flush();
 
+       
+        return new JsonResponse($newtexterme);
        }
 
     public function remove($data)
