@@ -2,11 +2,37 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
+use App\Controller\AffectationController;
+use ApiPlatform\Core\Annotation\ApiResource;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ * collectionOperations={
+ * "POST"={
+ *     "controller"=AffectationController::class,
+ *      "access_control"="is_granted('POST', object)",  
+ *     
+ *      },
+ * 
+ * "GETALL"={
+ * "method"="GET",
+ *   }
+ * },
+ * 
+ * itemOperations={
+ *    
+ * "recuperation"={
+ *      "method"="GET",
+ * },
+ * 
+ * "PUT"={
+ *     "controller"=AffectationController::class,
+ *      "access_control"="is_granted('EDIT', object)",  
+ *     
+ * },
+ * }
+ * )
  * @ORM\Entity(repositoryClass="App\Repository\AffectationRepository")
  */
 class Affectation
@@ -37,6 +63,11 @@ class Affectation
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="affectations")
      */
     private $user;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="secondaffectations")
+     */
+    private $useraffecteur;
 
     public function getId(): ?int
     {
@@ -87,6 +118,18 @@ class Affectation
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getUseraffecteur(): ?User
+    {
+        return $this->useraffecteur;
+    }
+
+    public function setUseraffecteur(?User $useraffecteur): self
+    {
+        $this->useraffecteur = $useraffecteur;
 
         return $this;
     }

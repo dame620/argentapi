@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Controller\UserController;
+use App\Controller\ImageController;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
@@ -16,6 +17,10 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 /**
  * @ApiFilter(BooleanFilter::class, properties={"isActive"})
  * @ApiResource(
+ * 
+ *  normalizationContext={
+ *         "groups"={"media_object_read"}
+ *     },
  * 
  * collectionOperations={
  * 
@@ -41,6 +46,26 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
  * 
  * "PUT"={
  *      "access_control"="is_granted('EDIT', object)",
+ *       "controller"=ImageController::class,
+ *        "deserialize"=false,
+ *   "validation_groups"={"Default", "media_object_create"},
+ *  "openapi_context"={
+ *                 "requestBody"={
+ *                     "content"={
+ *                         "multipart/form-data"={
+ *                             "schema"={
+ *                                 "type"="object",
+ *                                 "properties"={
+ *                                     "file"={
+ *                                         "type"="string",
+ *                                         "format"="binary"
+ *                                    }
+ *                                 }
+ *                             }
+ *                         }
+ *                     }
+ *                 }
+ *              }
  *    
  * },
  * }
@@ -113,7 +138,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="blob", nullable=true)
      */
-    private $profil;
+    private $image;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Partenaire", inversedBy="users")
@@ -126,12 +151,30 @@ class User implements UserInterface
      */
     private $affectations;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Affectation", mappedBy="useraffecteur")
+     */
+    private $secondaffectations;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Transaction", mappedBy="userenvoi")
+     */
+    private $transactionenvois;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Transaction", mappedBy="userretrait")
+     */
+    private $transactionretraits;
+
 
     public function __construct()
     {
         $this->depots = new ArrayCollection();
         $this->comptes = new ArrayCollection();
         $this->affectations = new ArrayCollection();
+        $this->secondaffectations = new ArrayCollection();
+        $this->transactionenvois = new ArrayCollection();
+        $this->transactionretraits = new ArrayCollection();
        /* $this->roles = array(
             'ROLE'.strtoupper($this->getRole()->getLibelle())
         );*/
@@ -316,14 +359,14 @@ class User implements UserInterface
     }
 
 
-    public function getProfil()
+    public function getImage()
     {
-        return $this->profil;
+        return $this->image;
     }
 
-    public function setProfil($profil): self
+    public function setImage($image): self
     {
-        $this->profil = $profil;
+        $this->image = $image;
 
         return $this;
     }
@@ -365,6 +408,99 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($affectation->getUser() === $this) {
                 $affectation->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Affectation[]
+     */
+    public function getSecondaffectations(): Collection
+    {
+        return $this->secondaffectations;
+    }
+
+    public function addSecondaffectation(Affectation $secondaffectation): self
+    {
+        if (!$this->secondaffectations->contains($secondaffectation)) {
+            $this->secondaffectations[] = $secondaffectation;
+            $secondaffectation->setUseraffecteur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSecondaffectation(Affectation $secondaffectation): self
+    {
+        if ($this->secondaffectations->contains($secondaffectation)) {
+            $this->secondaffectations->removeElement($secondaffectation);
+            // set the owning side to null (unless already changed)
+            if ($secondaffectation->getUseraffecteur() === $this) {
+                $secondaffectation->setUseraffecteur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Transaction[]
+     */
+    public function getTransactionenvois(): Collection
+    {
+        return $this->transactionenvois;
+    }
+
+    public function addTransactionenvois(Transaction $transactionenvois): self
+    {
+        if (!$this->transactionenvois->contains($transactionenvois)) {
+            $this->transactionenvois[] = $transactionenvois;
+            $transactionenvois->setUserenvoi($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransactionenvois(Transaction $transactionenvois): self
+    {
+        if ($this->transactionenvois->contains($transactionenvois)) {
+            $this->transactionenvois->removeElement($transactionenvois);
+            // set the owning side to null (unless already changed)
+            if ($transactionenvois->getUserenvoi() === $this) {
+                $transactionenvois->setUserenvoi(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Transaction[]
+     */
+    public function getTransactionretraits(): Collection
+    {
+        return $this->transactionretraits;
+    }
+
+    public function addTransactionretrait(Transaction $transactionretrait): self
+    {
+        if (!$this->transactionretraits->contains($transactionretrait)) {
+            $this->transactionretraits[] = $transactionretrait;
+            $transactionretrait->setUserretrait($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransactionretrait(Transaction $transactionretrait): self
+    {
+        if ($this->transactionretraits->contains($transactionretrait)) {
+            $this->transactionretraits->removeElement($transactionretrait);
+            // set the owning side to null (unless already changed)
+            if ($transactionretrait->getUserretrait() === $this) {
+                $transactionretrait->setUserretrait(null);
             }
         }
 
