@@ -2,11 +2,37 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
+use App\Controller\TransactionController;
+use ApiPlatform\Core\Annotation\ApiResource;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ * collectionOperations={
+ * "POST"={
+ *     "controller"=TransactionController::class,
+ *    
+ *     
+ *      },
+ * 
+ * "GETALL"={
+ * "method"="GET",
+ *   }
+ * },
+ * 
+ * itemOperations={
+ *    
+ * "recuperation"={
+ *      "method"="GET",
+ * },
+ * 
+ * "PUT"={
+ *     "controller"=TransactionController::class,
+ *     "access_control"="is_granted('EDIT', object)", 
+ *         
+ * },
+ * }
+ * )
  * @ORM\Entity(repositoryClass="App\Repository\TransactionRepository")
  */
 class Transaction
@@ -102,6 +128,11 @@ class Transaction
      * @ORM\Column(type="integer", nullable=true)
      */
     private $cnidestanataire;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $statu;
 
     public function getId(): ?int
     {
@@ -308,6 +339,18 @@ class Transaction
     public function setCnidestanataire(?int $cnidestanataire): self
     {
         $this->cnidestanataire = $cnidestanataire;
+
+        return $this;
+    }
+
+    public function getStatu(): ?bool
+    {
+        return $this->statu;
+    }
+
+    public function setStatu(?bool $statu): self
+    {
+        $this->statu = $statu;
 
         return $this;
     }
